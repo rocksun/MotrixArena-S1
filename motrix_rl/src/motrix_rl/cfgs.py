@@ -385,7 +385,7 @@ class navigation:
         seed: int = 42
         num_envs: int = 4096
         play_num_envs: int = 1
-        max_env_steps: int = 1024 * 60_000
+        max_env_steps: int = 1024 * 20_000
         check_point_interval: int = 1000
 
         learning_rate: float = 3e-4
@@ -406,56 +406,6 @@ class navigation:
 
         policy_hidden_layer_sizes: tuple[int, ...] = (512, 256, 128)
         value_hidden_layer_sizes: tuple[int, ...] = (512, 256, 128)
-
-    @rlcfg("vbot_navigation_section012")
-    @dataclass
-    class VBotNavigationSection02PPOConfig(PPOCfg):
-        """VBot Section02导航配置，与flatnavigation一致"""
-        seed: int = 42
-        num_envs: int = 2048
-        play_num_envs: int = 16
-        max_env_steps: int = 1024 * 60_000
-        check_point_interval: int = 1000
-
-        learning_rate: float = 3e-4
-        rollouts: int = 48
-        learning_epochs: int = 6
-        mini_batches: int = 32
-        discount_factor: float = 0.99
-        lambda_param: float = 0.95
-        grad_norm_clip: float = 1.0
-
-        ratio_clip: float = 0.2
-        value_clip: float = 0.2
-        clip_predicted_values: bool = True
-
-        policy_hidden_layer_sizes: tuple[int, ...] = (256, 128, 64)
-        value_hidden_layer_sizes: tuple[int, ...] = (256, 128, 64)
-
-    @rlcfg("vbot_navigation_section013")
-    @dataclass
-    class VBotNavigationSection03PPOConfig(PPOCfg):
-        """VBot Section03导航配置，与flatnavigation一致"""
-        seed: int = 42
-        num_envs: int = 2048
-        play_num_envs: int = 16
-        max_env_steps: int = 1024 * 60_000
-        check_point_interval: int = 1000
-
-        learning_rate: float = 3e-4
-        rollouts: int = 48
-        learning_epochs: int = 6
-        mini_batches: int = 32
-        discount_factor: float = 0.99
-        lambda_param: float = 0.95
-        grad_norm_clip: float = 1.0
-
-        ratio_clip: float = 0.2
-        value_clip: float = 0.2
-        clip_predicted_values: bool = True
-
-        policy_hidden_layer_sizes: tuple[int, ...] = (256, 128, 64)
-        value_hidden_layer_sizes: tuple[int, ...] = (256, 128, 64)
 
     @rlcfg("vbot_navigation_long_course")
     @dataclass
