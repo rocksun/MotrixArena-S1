@@ -13,4 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-from . import go1, go2  # noqa: F401 register envs
+# from . import vbot_np, vbot_stairs_np, vbot_stairs_multi_target_np, vbot_long_course_np, cfg # noqa: F401
+from . import  vbot_section01_np, cfg # noqa: F401
+from .vbot_section01_np import VBotSection01Env
+from .cfg import VBotEnvCfg, VBotStairsEnvCfg, VBotSection01EnvCfg, VBotLongCourseEnvCfg, VBotSection001EnvCfg, VBotSection011EnvCfg, VBotSection012EnvCfg,VBotSection013EnvCfg  # noqa: F401
