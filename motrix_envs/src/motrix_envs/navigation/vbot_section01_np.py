@@ -444,7 +444,7 @@ class VBotSection01Env(NpEnv):
         if np.any(drop_zone):
             low[drop_zone] = self._rough_vel_low
             high[drop_zone] = self._rough_vel_high
-            high[drop_zone, 0] = self._rough_vel_high[0] * 0.5  # 前进上限减半
+            high[drop_zone, 0] = self._rough_vel_high[0] * 0.7  # 前进上限减半
 
         # ── 区域3：上坡衔接+坡道（Y 1.8~6.8）──────────────────────────────────
         # 关键修复:落差降速到1.8结束、坡道原从2.5才开始,Y1.8~2.5是速度空档,

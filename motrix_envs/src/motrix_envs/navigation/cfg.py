@@ -370,7 +370,7 @@ class VBotSection01EnvCfg(VBotStairsEnvCfg):
                 # ===== 上坡段处理(Y 1.5~7.0)，治"上坡前面栽下去" =====
                 "slope_leg_drive": 3.0,    # 上坡段逼每条腿(尤其后腿)持续蹬地迈步，提供爬坡动力
                 "slope_pitch": -1.5,       # 上坡身体顺坡微前倾，惩罚偏离防前栽
-                "slope_hip": -1.0,         # 上坡髋关节张开惩罚，治前腿髋张开软倒
+                "slope_hip": -1.1,         # 上坡髋关节张开惩罚，治前腿髋张开软倒
                 "slope_front_drive": 3.0,  # 前腿上坡驱动，逼前腿积极迈步出力
             }
         )
