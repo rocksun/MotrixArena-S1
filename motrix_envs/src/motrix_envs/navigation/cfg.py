@@ -361,12 +361,12 @@ class VBotSection01EnvCfg(VBotStairsEnvCfg):
                 "undesired_contacts": -1.0,
                 "base_contact": -10.0,
                 # ===== 我的新增奖励项 =====
-                "per_leg_swing": 3.5,      # 逼每条腿都迈步，治后腿不动（核心，权重给大）
+                "per_leg_swing": 3.2,      # 逼每条腿都迈步，治后腿不动（核心，权重给大）
                 "gait_symmetry": 0.2,      # 鼓励对角腿同步的对角(trot)步态
                 "energy": 0.0,             # 能耗惩罚设为0(避免抑制后腿主动迈步)
                 "swing_foot_height": 1.5,  # 崎岖区抬腿高度奖励，治崎岖区绊倒
                 "drop_leg_catchup": 4.0,   # 核心：落差点(Y=1.5)额外逼后腿跟上，治"前腿出去后腿没出"
-                "drop_pitch": -2.0,        # 落差段压身体前倾，辅助
+                "drop_pitch": -2,        # 落差段压身体前倾，辅助
                 # ===== 上坡段处理(Y 1.5~7.0)，治"上坡前面栽下去" =====
                 "slope_leg_drive": 3.0,    # 上坡段逼每条腿(尤其后腿)持续蹬地迈步，提供爬坡动力
                 "slope_pitch": -1.5,       # 上坡身体顺坡微前倾，惩罚偏离防前栽
