@@ -38,6 +38,34 @@ class EnvMeta:
 _envs: Dict[str, EnvMeta] = {}
 
 
+def _apply_cfg_override(env_cfg: EnvCfg, dotted_key: str, value: Any) -> None:
+    """Apply a strict attribute/dictionary override such as ``reward_config.scales.foo``."""
+    parts = dotted_key.split(".")
+    if not dotted_key or any(not part for part in parts):
+        raise ValueError(f"Invalid config override path: '{dotted_key}'")
+
+    target: Any = env_cfg
+    for part in parts[:-1]:
+        if isinstance(target, dict):
+            if part not in target:
+                raise ValueError(f"Config override path '{dotted_key}' has no key '{part}'")
+            target = target[part]
+        elif hasattr(target, part):
+            target = getattr(target, part)
+        else:
+            raise ValueError(f"Config override path '{dotted_key}' has no attribute '{part}'")
+
+    final_part = parts[-1]
+    if isinstance(target, dict):
+        if final_part not in target:
+            raise ValueError(f"Config override path '{dotted_key}' has no key '{final_part}'")
+        target[final_part] = value
+    elif hasattr(target, final_part):
+        setattr(target, final_part, value)
+    else:
+        raise ValueError(f"Config override path '{dotted_key}' has no attribute '{final_part}'")
+
+
 def contains(name: str) -> bool:
     """Check if an environment configuration is registered."""
     return name in _envs
@@ -138,10 +166,7 @@ def make(
     env_cfg = meta.env_cfg_cls()
     if env_cfg_override is not None:
         for key, value in env_cfg_override.items():
-            if hasattr(env_cfg, key):
-                setattr(env_cfg, key, value)
-            else:
-                raise ValueError(f"Config class '{env_cfg.__class__.__name__}' has no attribute '{key}'")
+            _apply_cfg_override(env_cfg, key, value)
 
     # Validate config
     env_cfg.validate()

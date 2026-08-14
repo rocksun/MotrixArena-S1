@@ -15,6 +15,7 @@
 
 
 import logging
+from pathlib import Path
 
 from absl import app, flags
 from skrl import config
@@ -34,6 +35,21 @@ _RENDER = flags.DEFINE_bool("render", False, "Render the env")
 _TRAIN_BACKEND = flags.DEFINE_string("train-backend", "jax", "The learning backend. (jax/torch)")
 _SEED = flags.DEFINE_integer("seed", None, "Random seed for reproducibility")
 _RAND_SEED = flags.DEFINE_bool("rand-seed", False, "Generate random seed")
+_PER_LEG_SWING = flags.DEFINE_float(
+    "per-leg-swing",
+    None,
+    "Override reward_config.scales['per_leg_swing'] for the selected environment",
+)
+_SWING_FOOT_HEIGHT = flags.DEFINE_float(
+    "swing-foot-height",
+    None,
+    "Override reward_config.scales['swing_foot_height'] for the selected environment",
+)
+_EXPERIMENT_NAME = flags.DEFINE_string(
+    "experiment-name",
+    None,
+    "Use an explicit experiment directory name below runs/<env>/",
+)
 
 
 def get_train_backend(supports: utils.DeviceSupports):
@@ -56,6 +72,7 @@ def main(argv):
     enable_render = _RENDER.value
 
     rl_override = {}
+    env_override = {}
 
     if _NUM_ENVS.present:
         rl_override["num_envs"] = _NUM_ENVS.value
@@ -64,6 +81,17 @@ def main(argv):
         rl_override["seed"] = None
     elif _SEED.present:
         rl_override["seed"] = _SEED.value
+
+    if _PER_LEG_SWING.present:
+        env_override["reward_config.scales.per_leg_swing"] = _PER_LEG_SWING.value
+    if _SWING_FOOT_HEIGHT.present:
+        env_override["reward_config.scales.swing_foot_height"] = _SWING_FOOT_HEIGHT.value
+
+    experiment_name = _EXPERIMENT_NAME.value
+    if experiment_name:
+        experiment_path = Path(experiment_name)
+        if experiment_path.is_absolute() or ".." in experiment_path.parts:
+            raise app.UsageError("--experiment-name must stay below runs/<env>/")
 
     sim_backend = _SIM_BACKEND.value
     train_backend = "jax"
@@ -77,13 +105,27 @@ def main(argv):
         from motrix_rl.skrl.jax.train import ppo
 
         config.jax.backend = "jax"  # or "numpy"
-        trainer = ppo.Trainer(env_name, sim_backend, cfg_override=rl_override, enable_render=enable_render)
+        trainer = ppo.Trainer(
+            env_name,
+            sim_backend,
+            cfg_override=rl_override,
+            enable_render=enable_render,
+            env_cfg_override=env_override,
+            experiment_name=experiment_name,
+        )
 
     elif train_backend == "torch":
         from motrix_rl.skrl.torch.train import ppo
 
         config.torch.backend = "torch"
-        trainer = ppo.Trainer(env_name, sim_backend, cfg_override=rl_override, enable_render=enable_render)
+        trainer = ppo.Trainer(
+            env_name,
+            sim_backend,
+            cfg_override=rl_override,
+            enable_render=enable_render,
+            env_cfg_override=env_override,
+            experiment_name=experiment_name,
+        )
     else:
         raise Exception(f"Unknown train backend: {train_backend}")
 
