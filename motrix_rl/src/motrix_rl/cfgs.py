@@ -385,7 +385,7 @@ class navigation:
         seed: int = 42
         num_envs: int = 4096
         play_num_envs: int = 1
-        max_env_steps: int = 1024 * 20_000
+        max_env_steps: int = 1024 * 60_000
         check_point_interval: int = 1000
 
         learning_rate: float = 3e-4
