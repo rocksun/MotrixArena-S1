@@ -794,6 +794,10 @@ class VBotSection01Env(NpEnv):
         metrics.update(
             {
                 "goal_idx": info["goal_idx"].astype(np.float32),
+                # Relative to each episode's sampled start point.  This is the
+                # meaningful "furthest distance" for the section01 route,
+                # unlike distance_to_waypoint which decreases as the robot succeeds.
+                "course_distance": (pose[:, 1] - info["spawn_y"]).astype(np.float32),
                 "distance_to_waypoint": info["distance_to_waypoint"].astype(np.float32),
                 "target_progress": target_progress.astype(np.float32),
                 "forward_progress": forward_progress.astype(np.float32),
@@ -888,6 +892,7 @@ class VBotSection01Env(NpEnv):
             "feet_air_time": np.zeros((num_envs, 4), dtype=np.float32),
             "first_contact": np.zeros((num_envs, 4), dtype=np.bool_),
             "air_time_before_contact": np.zeros((num_envs, 4), dtype=np.float32),
+            "spawn_y": spawn_xyz[:, 1].astype(np.float32).copy(),
             "spawn_z": spawn_xyz[:, 2].astype(np.float32).copy(),
             "waypoints": waypoints,
             "num_waypoints": np.full((num_envs,), waypoints.shape[1], dtype=np.int32),

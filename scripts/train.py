@@ -34,6 +34,11 @@ _RENDER = flags.DEFINE_bool("render", False, "Render the env")
 _TRAIN_BACKEND = flags.DEFINE_string("train-backend", "jax", "The learning backend. (jax/torch)")
 _SEED = flags.DEFINE_integer("seed", None, "Random seed for reproducibility")
 _RAND_SEED = flags.DEFINE_bool("rand-seed", False, "Generate random seed")
+_EXPERIMENT_NAME = flags.DEFINE_string(
+    "experiment-name",
+    None,
+    "PPO experiment directory name (defaults to the framework-generated name)",
+)
 
 
 def get_train_backend(supports: utils.DeviceSupports):
@@ -77,13 +82,25 @@ def main(argv):
         from motrix_rl.skrl.jax.train import ppo
 
         config.jax.backend = "jax"  # or "numpy"
-        trainer = ppo.Trainer(env_name, sim_backend, cfg_override=rl_override, enable_render=enable_render)
+        trainer = ppo.Trainer(
+            env_name,
+            sim_backend,
+            cfg_override=rl_override,
+            enable_render=enable_render,
+            experiment_name=_EXPERIMENT_NAME.value,
+        )
 
     elif train_backend == "torch":
         from motrix_rl.skrl.torch.train import ppo
 
         config.torch.backend = "torch"
-        trainer = ppo.Trainer(env_name, sim_backend, cfg_override=rl_override, enable_render=enable_render)
+        trainer = ppo.Trainer(
+            env_name,
+            sim_backend,
+            cfg_override=rl_override,
+            enable_render=enable_render,
+            experiment_name=_EXPERIMENT_NAME.value,
+        )
     else:
         raise Exception(f"Unknown train backend: {train_backend}")
 

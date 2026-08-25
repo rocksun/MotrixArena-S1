@@ -38,6 +38,7 @@ def _get_cfg(
     rlcfg: PPOCfg,
     env: Wrapper,
     log_dir: str = None,
+    experiment_name: str | None = None,
 ) -> dict:
     # configure and instantiate the agent (visit its documentation to see all the options)
     # https://skrl.readthedocs.io/en/latest/api/agents/ppo.html#configuration-and-hyperparameters
@@ -76,6 +77,8 @@ def _get_cfg(
         cfg["experiment"]["write_interval"] = rlcfg.check_point_interval
         cfg["experiment"]["checkpoint_interval"] = rlcfg.check_point_interval
         cfg["experiment"]["directory"] = log_dir
+        if experiment_name:
+            cfg["experiment"]["experiment_name"] = experiment_name
     else:
         cfg["experiment"]["write_interval"] = 0
         cfg["experiment"]["checkpoint_interval"] = 0
@@ -155,6 +158,7 @@ class Trainer:
         sim_backend: str = None,
         enable_render: bool = False,
         cfg_override: dict = None,
+        experiment_name: str | None = None,
     ) -> None:
         rlcfg = registry.default_rl_cfg(env_name, "skrl", backend="torch")
         if cfg_override is not None:
@@ -163,6 +167,7 @@ class Trainer:
         self._env_name = env_name
         self._sim_backend = sim_backend
         self._enable_render = enable_render
+        self._experiment_name = experiment_name
 
     def train(self) -> None:
         """
@@ -173,7 +178,12 @@ class Trainer:
         set_seed(rlcfg.seed)
         skrl_env = wrap_env(env, self._enable_render)
         models = self._make_model(skrl_env, rlcfg)
-        ppo_cfg = _get_cfg(rlcfg, skrl_env, log_dir=get_log_dir(self._env_name))
+        ppo_cfg = _get_cfg(
+            rlcfg,
+            skrl_env,
+            log_dir=get_log_dir(self._env_name),
+            experiment_name=self._experiment_name,
+        )
         agent = self._make_agent(models, skrl_env, ppo_cfg)
         cfg_trainer = {
             "timesteps": rlcfg.max_batch_env_steps,
