@@ -341,9 +341,9 @@ class VBotSection01EnvCfg(VBotStairsEnvCfg):
                 # 奖励核心：速度跟踪 + 紧凑的正则项 + 接触塑形。
                 "termination": -10.0,
                 "tracking_lin_vel": 1.2,
-                "tracking_ang_vel": 0.6,
+                "tracking_ang_vel": 0.54,
                 "tracking_goal_vel": 2.0,
-                "tracking_yaw": 0.5,
+                "tracking_yaw": 0.55,
                 "forward_progress": 1.0,
                 "target_progress": 1.0,
                 "reach_goal": 8.0,

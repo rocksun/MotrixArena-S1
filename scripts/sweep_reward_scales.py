@@ -52,6 +52,12 @@ DEFAULT_REWARDS = (
     "anti_stall",
     "dof_pos_limits",
     "undesired_contacts",
+    "per_leg_swing",
+    "gait_symmetry",
+    "energy",
+    "swing_foot_height",
+    "drop_leg_catchup",
+    "drop_pitch",
 )
 
 NUMBER = r"[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?"
@@ -205,6 +211,12 @@ def main() -> int:
     try:
         for reward in rewards:
             original_value = reward_value(original_source, reward)
+            if original_value == 0.0 and any(change != 0.0 for change in args.changes):
+                print(
+                    f"Warning: {reward}=0.0; relative changes leave it at 0.0. "
+                    "Use a non-zero base value before sweeping it.",
+                    file=sys.stderr,
+                )
             for change in args.changes:
                 if expected_source is not None and CONFIG_PATH.read_text(encoding="utf-8") != expected_source:
                     raise RuntimeError(
