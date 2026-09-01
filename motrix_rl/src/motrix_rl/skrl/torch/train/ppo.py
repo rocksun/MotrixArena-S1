@@ -13,8 +13,10 @@
 # limitations under the License.
 # ==============================================================================
 
+import logging
 from typing import Any
 
+import numpy as np
 import torch
 import torch.nn as nn
 from skrl.agents.torch.ppo import PPO as BasePPO
@@ -32,6 +34,8 @@ from motrix_rl import registry
 from motrix_rl.skrl import get_log_dir
 from motrix_rl.skrl.cfg import PPOCfg
 from motrix_rl.skrl.torch import wrap_env
+
+logger = logging.getLogger(__name__)
 
 
 def _get_cfg(
@@ -159,6 +163,7 @@ class Trainer:
         enable_render: bool = False,
         cfg_override: dict = None,
         experiment_name: str | None = None,
+        log_resets: bool = False,
     ) -> None:
         rlcfg = registry.default_rl_cfg(env_name, "skrl", backend="torch")
         if cfg_override is not None:
@@ -168,6 +173,7 @@ class Trainer:
         self._sim_backend = sim_backend
         self._enable_render = enable_render
         self._experiment_name = experiment_name
+        self._log_resets = log_resets
 
     def train(self) -> None:
         """
@@ -210,11 +216,43 @@ class Trainer:
                 t = time.time()
                 outputs = agent.act(obs, timestep=0, timesteps=0)
                 actions = outputs[-1].get("mean_actions", outputs[0])
-                obs, _, _, _, _ = env.step(actions)
+                obs, _, terminated, truncated, infos = env.step(actions)
+                self._log_episode_resets(terminated, truncated, infos)
                 env.render()
                 delta_time = time.time() - t
                 if delta_time < 1.0 / fps:
                     time.sleep(1.0 / fps - delta_time)
+
+    def _log_episode_resets(self, terminated, truncated, infos: dict) -> None:
+        if not self._log_resets:
+            return
+        done = np.logical_or(
+            terminated.detach().cpu().numpy().reshape(-1),
+            truncated.detach().cpu().numpy().reshape(-1),
+        )
+        for env_index in np.flatnonzero(done):
+            reasons = [
+                name
+                for name, key in (
+                    ("goal_reached", "reset_reason_goal_reached"),
+                    ("base_contact", "reset_reason_base_contact"),
+                    ("timeout", "reset_reason_timeout"),
+                    ("speed_overflow", "reset_reason_speed_overflow"),
+                    ("invalid_state", "reset_reason_invalid"),
+                )
+                if bool(np.asarray(infos.get(key, np.zeros_like(done)))[env_index])
+            ]
+            distance = float(
+                np.asarray(infos.get("reset_course_distance", np.full(done.shape, float("nan"))))[env_index]
+            )
+            step = int(np.asarray(infos.get("reset_episode_step", np.zeros_like(done, dtype=int)))[env_index])
+            logger.info(
+                "Episode reset: env=%d step=%d distance=%.3fm reason=%s",
+                env_index,
+                step,
+                distance,
+                ",".join(reasons) if reasons else "unknown",
+            )
 
     def _make_model(self, env: Wrapper, rlcfg: PPOCfg) -> dict[str, Model]:
         def build_mlp(

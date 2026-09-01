@@ -351,18 +351,18 @@ class VBotSection01EnvCfg(VBotStairsEnvCfg):
                 "lin_vel_z": -2.0,
                 "ang_vel_xy": -0.05,
                 "orientation": -0.5,
-                "torques": -0.00001,
+                "torques": -9e-06,
                 "dof_vel": -0.0001,
                 "dof_acc": -2.5e-7,
                 "action_rate": -0.01,
                 "feet_air_time": 1.0,  # 0.8->1.0，更鼓励抬腿摆动，增大步幅
                 "anti_stall": -0.8,
-                "dof_pos_limits": -0.5,
+                "dof_pos_limits": -0.45,
                 "undesired_contacts": -1.0,
                 "base_contact": -10.0,
                 # ===== 我的新增奖励项 =====
                 "per_leg_swing": 3.0,      # 逼每条腿都迈步，治后腿不动（核心，权重给大）
-                "gait_symmetry": 0.2,      # 鼓励对角腿同步的对角(trot)步态
+                "gait_symmetry": 0.22,      # 鼓励对角腿同步的对角(trot)步态
                 "energy": 0.0,             # 能耗惩罚设为0(避免抑制后腿主动迈步)
                 "swing_foot_height": 1.5,  # 崎岖区抬腿高度奖励，治崎岖区绊倒
                 "drop_leg_catchup": 4.0,   # 核心：落差点(Y=1.5)额外逼后腿跟上，治"前腿出去后腿没出"

@@ -564,6 +564,9 @@ class VBotSection01Env(NpEnv):
         base_contact = self._get_base_contacts(data)
         speed_overflow = np.sum(np.square(base_lin_vel_world[:, :2]), axis=1) > 1e8
         invalid = np.isnan(pose).any(axis=1) | np.isnan(self.get_dof_vel(data)).any(axis=1)
+        timeout = np.zeros((data.shape[0],), dtype=bool)
+        if self._cfg.max_episode_steps:
+            timeout = (info["steps"] + 1) >= self._cfg.max_episode_steps
         # 我们的终止策略：基座触地即终止；超时由 NpEnv 的 truncation 处理。
         # 数值异常(NaN/速度溢出)作为兜底保护一并终止。
         terminated = base_contact.copy()
@@ -572,12 +575,19 @@ class VBotSection01Env(NpEnv):
         terminated = np.logical_or(terminated, info["goal_done"])
         info["base_contact"] = base_contact
         info["fall_like_termination"] = base_contact.copy()
+        # NpEnv resets done environments before returning info. Keep separate
+        # fields that are not reset so play.py can report the actual cause.
+        info["reset_reason_goal_reached"] = info["goal_done"].copy()
+        info["reset_reason_base_contact"] = base_contact.copy()
+        info["reset_reason_speed_overflow"] = speed_overflow.copy()
+        info["reset_reason_invalid"] = invalid.copy()
+        info["reset_reason_timeout"] = timeout.copy()
+        info["reset_episode_step"] = (info["steps"] + 1).copy()
         return terminated
 
     def _update_goal_success_metrics(self, info: dict, terminated: np.ndarray):
         done_now = terminated.astype(bool)
-        if self._cfg.max_episode_steps:
-            done_now = np.logical_or(done_now, (info["steps"] + 1) >= self._cfg.max_episode_steps)
+        done_now = np.logical_or(done_now, info["reset_reason_timeout"])
         if np.any(done_now):
             success = np.logical_and(done_now, info["goal_done"])
             self._goal_done_episodes += int(np.sum(done_now))
@@ -798,6 +808,11 @@ class VBotSection01Env(NpEnv):
                 # meaningful "furthest distance" for the section01 route,
                 # unlike distance_to_waypoint which decreases as the robot succeeds.
                 "course_distance": (pose[:, 1] - info["spawn_y"]).astype(np.float32),
+                "reset_goal_reached": info["reset_reason_goal_reached"].astype(np.float32),
+                "reset_base_contact": info["reset_reason_base_contact"].astype(np.float32),
+                "reset_timeout": info["reset_reason_timeout"].astype(np.float32),
+                "reset_speed_overflow": info["reset_reason_speed_overflow"].astype(np.float32),
+                "reset_invalid": info["reset_reason_invalid"].astype(np.float32),
                 "distance_to_waypoint": info["distance_to_waypoint"].astype(np.float32),
                 "target_progress": target_progress.astype(np.float32),
                 "forward_progress": forward_progress.astype(np.float32),
@@ -812,6 +827,7 @@ class VBotSection01Env(NpEnv):
             }
         )
         info["metrics"] = metrics
+        info["reset_course_distance"] = (pose[:, 1] - info["spawn_y"]).astype(np.float32)
         info["prev_distance_to_waypoint"] = distance_to_waypoint.astype(np.float32)
         return np.clip(reward, -100.0, 1000.0).astype(np.float32)
 

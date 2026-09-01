@@ -34,6 +34,11 @@ _POLICY = flags.DEFINE_string("policy", None, "The policy to load")
 _NUM_ENVS = flags.DEFINE_integer("num-envs", 2048, "Number of envs to play")
 _SEED = flags.DEFINE_integer("seed", None, "Random seed for reproducibility")
 _RAND_SEED = flags.DEFINE_bool("rand-seed", False, "Generate random seed")
+_LOG_RESETS = flags.DEFINE_bool(
+    "log-resets",
+    False,
+    "Log each environment reset with its termination reason (recommended with --num-envs=1)",
+)
 
 
 def get_inference_backend(policy_path: str):
@@ -145,7 +150,13 @@ def main(argv):
         from motrix_rl.skrl.jax.train import ppo
 
         config.jax.backend = "jax"  # or "numpy"
-        trainer = ppo.Trainer(env_name, sim_backend, cfg_override=rl_override, enable_render=enable_render)
+        trainer = ppo.Trainer(
+            env_name,
+            sim_backend,
+            cfg_override=rl_override,
+            enable_render=enable_render,
+            log_resets=_LOG_RESETS.value,
+        )
         trainer.play(policy_path)
 
     elif backend == "torch":
@@ -153,7 +164,13 @@ def main(argv):
         from motrix_rl.skrl.torch.train import ppo
 
         config.torch.backend = "torch"
-        trainer = ppo.Trainer(env_name, sim_backend, cfg_override=rl_override, enable_render=enable_render)
+        trainer = ppo.Trainer(
+            env_name,
+            sim_backend,
+            cfg_override=rl_override,
+            enable_render=enable_render,
+            log_resets=_LOG_RESETS.value,
+        )
         trainer.play(policy_path)
 
 

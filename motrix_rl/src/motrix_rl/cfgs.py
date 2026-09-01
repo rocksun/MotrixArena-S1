@@ -350,7 +350,7 @@ class navigation:
         """VBot stairs导航配置，与locomotion stairs一致"""
         seed: int = 42
         share_policy_value_features: bool = False
-        max_env_steps: int = 1024 * 60_000  # 与locomotion一致
+        max_env_steps: int = 1024 * 60_000 * 3  # 与locomotion一致
         num_envs: int = 2048
 
         # 与locomotion stairs一致的PPO配置
@@ -385,7 +385,7 @@ class navigation:
         seed: int = 42
         num_envs: int = 4096
         play_num_envs: int = 1
-        max_env_steps: int = 1024 * 40_000
+        max_env_steps: int = 1024 * 60_000 * 3
         check_point_interval: int = 1000
 
         learning_rate: float = 3e-4
