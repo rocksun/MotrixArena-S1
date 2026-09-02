@@ -33,6 +33,7 @@ demo/dm_hopper
 demo/dm_reacher
 demo/locomotion_unitree_go1
 demo/locomotion_unitree_go1_rough_terrain
+demo/vbot_navigation_section01
 demo/anymal_c
 demo/franka_lift_cube
 demo/franka_open_cabinet
